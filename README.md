@@ -2,7 +2,7 @@
 Ambiente de composição musical com arquitetura modular e fluxo processual imperativo. 
 
 ### Descrição 
-M-dulo opera com um conjunto de módulos composicionais multiparamétricos que, combinados em um fluxo linear de execução, produzem um único aqruivo MIDI multipista. O ambiente pode ser usado tanto para a criação de pequenos blocos de informação musical quanto, por meio da justaposição e combinação de módulos em matrizes de cada parâmetro (altura, duração e dinâmica), composições altamente estruturadas. M-dulo também é um ambiente aberto que suporta a implementação de outros fluxos de geração de dados como, por exemplo, o endereçamento da saída para leitores e reprodutores MIDI em tempo real.
+M-dulo opera com um conjunto de módulos composicionais multiparamétricos que, combinados em um fluxo linear de execução, produzem um único arquivo MIDI multipista. O ambiente pode ser usado tanto para a criação de pequenos blocos de informação musical quanto, por meio da justaposição e combinação de módulos em matrizes de cada parâmetro (altura, duração e dinâmica), composições altamente estruturadas. M-dulo também é um ambiente aberto que suporta a implementação de outros fluxos de geração de dados como, por exemplo, o endereçamento da saída para leitores e reprodutores MIDI em tempo real.
 
 ### Instalação
 1. Clonar ou realizar download dos arquivos do repositório M-dulo
