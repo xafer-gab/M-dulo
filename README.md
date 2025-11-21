@@ -14,7 +14,7 @@ pip install -r requirements.txt
 ```
 
 ### Uso
-O ambiente é estruturado por diversos módulos dispostos como bibliotecas de funções no diretório "modulos". Cada arquivo agrupa um conjunto de funções, tais como as rotações seriais de <code>series.series_paralelas()</code>, ou geração de conteúdo harmônico a partir de algoritmos <code>MIDO.mido()</code>.
+O ambiente é estruturado por diversos módulos dispostos como bibliotecas de funções no diretório "modulos". Cada arquivo agrupa um conjunto de funções, tais como as rotações seriais de <code>series.series_paralelas()</code>, ou geração de conteúdo harmônico a partir de algoritmos <code>MIPRO.mipro()</code>.
 Os módulos são compostos de maneira imperativa, como concatenação de eventos musicais, no interior da função <code>exe_modulos()</code> em <code>main.py</code>. 
 
 Dado o seu aspecto aberto, outros fluxos de criação são propiciados durante a construção da *partitura-texto*.
