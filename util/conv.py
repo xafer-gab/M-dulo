@@ -26,7 +26,3 @@ def nota_para_midi(notas, duracoes, dinamicas, din_rand=True):
 
     #Retorna matriz com três parâmetros
     return notas_midi
-        
-            
-        
-        
