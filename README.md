@@ -1,4 +1,7 @@
 # M-dulo
+[![DOI](https://zenodo.org/badge/DOI/zenodo.1100965444.svg)](https://doi.org/10.5281/zenodo.18259764)
+![Version](https://img.shields.io/badge/version-v1.0.0-blue)
+
 Ambiente de composição musical com arquitetura modular e fluxo processual imperativo. 
 
 ### Descrição 
