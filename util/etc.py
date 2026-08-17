@@ -21,3 +21,16 @@ def iguala_maior(lis1, lis2):
     
     return l_1, l_2
     
+def concatena():
+    melodias_concatenadas = [[],[],[]]
+    for serie in melodias:
+        for i, param in enumerate(serie):
+            melodias_concatenadas[i].extend(param)
+    return melodias_concatenadas
+
+def sobrepoe()
+    melodias_sobrepostas = [[],[],[]]
+    for serie in melodias:
+        for i, param in enumerate(serie):
+            melodias_sobrepostas[i].append(param)
+    return melodias_sobrepostas

@@ -1,7 +1,9 @@
 import random
 from util import etc as ut_etc
 
-#Filtra listas de alturas, durações e dinâmicas em séries do mesmo comprimento
+#Adequa o comprimento de séries desiguais de alturas, durações e dinâmicas
+#Se tipo="aumenta", as séries menores são repetidas até o tamanho da maior série
+#Se tipo="diminui", as série maiores são truncadas para o tamanho da menor série
 def series_paralelas(serie_altura, serie_duracao, serie_dinamica, tipo="aumenta"):
     
     #Lista de de saída
@@ -47,7 +49,9 @@ def series_paralelas(serie_altura, serie_duracao, serie_dinamica, tipo="aumenta"
     return lis_alt, lis_dur, lis_din
           
           
-#Produz uma série a partir de uma lista de índices (ou outra série)            
+#Produz uma série de "n" notas a partir de um conjunto ordenado e de uma lista de índices.
+#serie_selecionada: conjunto ordenado ou série-matriz que será selecionado.
+#serie_seletora: sequência de índices que produz uma seleção no conjunto.
 def serializa_por_idx(serie_selecionada, serie_seletora, n_notas=10):
     
     #Certifica-se de que não há índices fora do limite
@@ -63,8 +67,8 @@ def serializa_por_idx(serie_selecionada, serie_seletora, n_notas=10):
         c += 1
     return s_saida
     
-#Gera uma combinação de séries rotativas fixas e seleções randômicas de uma série
-#fix_rot = configuração de rotação e aleatoriedade (0 = aleatoriza; 1 = rotaciona)
+#Gera uma combinação de séries rotativas fixas e/ou randômicas de três séries (altura, duração e dinâmica)
+#fix_rot = configuração de rotação e aleatoriedade (1 = aleatoriza; 0 = rotaciona)
 def serie_rand_rotativa(serie_altura, serie_duracao, serie_dinamica, n_notas=10, fix_rot=[1, 0, 0]):
     
     #Comprimento de séries
@@ -97,3 +101,5 @@ def serie_rand_rotativa(serie_altura, serie_duracao, serie_dinamica, n_notas=10,
         c += 1
     
     return lis_alt, lis_dur, lis_din
+    
+
