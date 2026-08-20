@@ -1,0 +1,4 @@
+__pycache__/
+*.py[cod]
+.fuse_hidden*
+.DS_Store
