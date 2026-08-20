@@ -2,3 +2,5 @@ __pycache__/
 *.py[cod]
 .fuse_hidden*
 .DS_Store
+a_queda_do_paissandu.py
+main_paissandu.py

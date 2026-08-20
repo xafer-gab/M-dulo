@@ -1,13 +1,15 @@
 import midi.gerador_midi as midi
-from projetos import a_queda_do_paissandu as paissandu
+from projetos import exemplo
 
 #Diretório para exportar midi
-diretorio = "/mnt/disco_rigido/J_Scripts e programas/M-dulo/"
+diretorio = "/dir"
 data = []  
 
 #Fluxo imperativo de execução dos módulos
-#data.append(paissandu.A_F1)
-#data.append(paissandu.A_F2)
+data.append(exemplo.melodia_1)
+data.append(exemplo.melodia_2)
+data.append(exemplo.melodias_sobrepostas)
+data.append(exemplo.melodias_concatenadas)
 
 if __name__ == "__main__":
     print(f' --- M-dulo\n --- Composição modular-imperativa\n --- v.1.0.0 (2026)\n')
