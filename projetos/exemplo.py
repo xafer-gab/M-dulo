@@ -1,5 +1,5 @@
 from modulos import series
-from util import etc
+from util import edicao
 
 def modulo_exemplo(harmonia, melodia, ritmica, dinamica):
     
@@ -36,8 +36,8 @@ melodia_2 = modulo_exemplo(harmonia_2, melodia_2, ritmica_2, dinamica_2)
 melodias = [melodia_1, melodia_2]
 
 #1. Sobrepõe vozes
-melodias_sobrepostas = etc.sobrepoe(melodias)
+melodias_sobrepostas = edicao.sobrepoe(melodias)
 
 #2. Concatenação de módulos
-melodias_concatenadas = etc.concatena(melodias)
+melodias_concatenadas = edicao.concatena(melodias)
     

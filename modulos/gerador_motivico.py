@@ -1,15 +1,9 @@
-#from data.midi_part import alt_midi, midi_alt
-#from modulos.series import serializa_por_idx
 import random
 
-# ----- A queda do Paissandú -----
-# --- para orquestra sinfônica ---
-# ------------- 2026 -------------
-
-# Métodos desenvolvidos para a peça "A Queda do Paissandú" (2026)
+# Método desenvolvido para a peça "A Queda do Paissandú" (2026)
 
 ''' 
-Método 1 - Geração motívica com princípio estocástico
+Geração motívica com princípio estocástico
 
 1. Parte-se de um modelo motívico (serie_alt, serie_dur).
 2. Define-se um conjunto ordenado de alturas, ou modo (lis_modo).
@@ -28,7 +22,10 @@ Estrutura de dados
     n_tempos = int, sendo 1 = um tempo
     preenchimemento = float que estipula a porcentagem de preenchimento (0.0 a 1.0)
     quantizacao = aproximação do valor das pausas para os múltiplos de "q" (fusa, semicolcheia, etc).
+    
+- Método desenvolvido para a peça "A Queda do Paissandú" (2026)
 '''
+
 def gerador_motivico_estocastico(serie_alt, serie_dur, lis_modo, dur_escala: float, n_tempos, preenchimento, quantizacao):
     
     modo_idx_max = len(lis_modo)
@@ -150,7 +147,6 @@ def gerador_motivico_estocastico(serie_alt, serie_dur, lis_modo, dur_escala: flo
             saida[1].extend([float(v) for v in objetos_selecionados[idx_n][1]]) #força tipagem na saída
             idx_n += 1
     
-    
     #Garante que não faltou tempos na saída, e adiciona pausas
     tempo_total = sum(saida[1])
 
@@ -160,165 +156,94 @@ def gerador_motivico_estocastico(serie_alt, serie_dur, lis_modo, dur_escala: flo
         saida[1].append(n_tempos - tempo_total)
     
     #Retorna o segmentos completo
-    return saida[0], saida[1]
+    return saida[0], saida[1] #Altura, duração
 
 '''
-modo = ['a', 'b', 'c']
-serie_alt = [0, 1, 2]
-serie_dur = [0.25, 0.5, 1.0]
-preenchimento = 0.99
+Construtor melódico
 
-print("preenchimento: "+ str(preenchimento))
+Produz melodias de n tempos a partir da permutação de figuras rítmicas selecionadas,
+intercaladas com notas longa, assim como quantização específica por figura.
 
-for i in range(4):
-    print(gerador_motivico_estocastico(serie_alt, serie_dur, modo, 2.0, 20, preenchimento, 0.5))
+- Método desenvolvido para a peça "A Queda do Paissandú" (2026)
 '''
+def construtor_melodico(harm, serie, fig_lis, duracao, prob_nota_longa=0.6):
+    
+    #Lista de figuras rítmicas [0] = fig; [1] = quantização requerida
+    figuras_totais = [
+        [[0.125, 0.125, 0.125, 0.125], [0.25]], #0 = Fusas
+        [[0.167, 0.167, 0.166], [0.5]],         #1 = Sextina
+        [[0.2, 0.2, 0.2, 0.2, 0.2], [1.0]],     #2 = Quintina
+        [[0.25, 0.25, 0.25], [0.25]],           #3 = Semicolcheias
+        [[0.33, 0.33, 0.33], [1.0]],            #4 = Tercinas
+        [[0.75, 0.25], [0.25]],                 #5 = Pontuada
+        [[4], [0.5]]                            #6 = Nota longa
+    ]
+    
+    #Seleciona as figuras
+    figuras = [figuras_totais[idx] for idx in fig_lis]
+    
+    #Valida a adequação das séries
+    if len(harm) <= max(serie):
+        raise ValueError(
+        "A série de alturas possue valores incompatíveis com o conjunto harmônico:" +
+        f"\nNúmero de elementos no conjunto harmônico = {len(harm)}" +
+        f"\nÍndice máximo da série = {max(serie)}"
+        )
+    
+    #Verifica se duração é quantizável
+    quantizacao = 0.25
+    if duracao % quantizacao != 0:
+        raise ValueError(f'O valor {duracao} não é múltiplo de 0.25, o valor de quantização')
 
-'''
-Método 4 - Miscigenação Serial
-Duas séries podem ser miscigenadas, produzindo uma nova série única. Para isso, um
-fragmento de cada série — como um código genético — são combinados estocasticamente
+    #Constrói a melodia
+    melodia = [[],[]]; serie = []
+    acc_serie = 0
+    c = 0; nota_longa = 0
+    while c < duracao:
 
-1. Obtém-se o tamanho médio de duas séries escolhidas. Isso é obtido por média simples arredondada.
-   O valor obtido será o tamanho da nova série.
-2. É gerada uma porcentagem aleatória de mistura, assim como uma porcentagem aleatória de variação espontânea.
-3. Segmentos aleatórios (contíguos) são selecionados das séries progenitoras, bem como uma sequência aleatória
-   de variação. Estes segmentos são justapostos em ordem aleatória
-'''
-
-def miscigenacao_serial(serie_a: list, serie_b: list):
-    
-    #Determina o tamanho médio
-    comp_medio = (len(serie_a) + len(serie_b)) // 2
-    
-    #Valor aleatório de mistura e mutação
-    mistura_a = random.uniform(0.4, 0.6)
-    mistura_b = random.uniform(0.4, 0.6)
-    variacao = random.uniform(0.1, 0.2)
-    
-    #Normaliza os valores
-    norm = mistura_a + mistura_b + variacao
-    mistura_norm = [mistura_a/norm, mistura_b/norm, variacao/norm]
-    
-    #Escala para o tamanho da série
-    selecao = [round(peso * comp_medio) for peso in mistura_norm]
-    
-    #Garante o tamanho correto na saída
-    i = 2
-    while sum(selecao) != comp_medio:
-        if sum(selecao) > comp_medio:
-            selecao[i] -= 1
+        #Determina se é nota longa ou não
+        r_nota_longa = random.random()
+        if r_nota_longa < prob_nota_longa:
+            rand_fig = [[duracao + 1],[1]]
         else:
-            selecao[i] += 1
-        i -= 1
-        if i < 0: i = 2
-    
-    #Seleciona um fragmento das séries progenitoras
-    #Serie A
-    frag_a = []
-    idx_a = random.randrange(0, len(serie_a))
-    for _ in range(selecao[0]):
-        idx_a = idx_a % len(serie_a)
-        frag_a.append(serie_a[idx_a] % comp_medio)
-        idx_a += 1
+            rand_fig = random.choice(figuras)
         
-    #Serie B
-    frag_b = []
-    idx_b = random.randrange(0, len(serie_b))
-    for _ in range(selecao[1]):
-        idx_b = idx_b % len(serie_b)
-        frag_b.append(serie_b[idx_b] % comp_medio)
-        idx_b += 1
-        
-    #Variação
-    frag_var = []
-    for _ in range(selecao[2]):
-        frag_var.append(random.randrange(0, comp_medio))
-        
-    #Mistura fragmentos
-    fragmentos = [frag_a, frag_b, frag_var]
-    random.shuffle(fragmentos)
-    
-    #Concatena a nova série
-    serie_descendente = []
-    for frag in fragmentos:
-        try:
-            for v in frag:
-                serie_descendente.append(v)
-        except:
-            pass
+        #Se quantizado pela figura e cabe no tempo restante
+        if c % rand_fig[1][0] == 0 and sum(rand_fig[0]) <= (duracao - c):
             
-    return serie_descendente
-        
-def progenitura(series, tipo='casais', n_desc=2, n_geracoes=2):
-    n_series = len(series)
-    
-    #Verifica se o conjunto forma casais
-    if tipo == 'casais':
-        if n_series % 2 != 0 or n_series == 0:
-            raise ValueError(f"O número de séries não forma pares. Número de séries: {n_series}.")
-
-        #Gera prole, sempre fazendo cruzamento entre "primos/as"
-        prole = [series[:]]
-        for i in range(n_geracoes):
-            nova_geracao = []
-            c = 0
-            for r in range(len(prole[i]) // 2):
-                s1 = prole[i][c]
-                if i == 0:
-                    s2 = prole[i][c + 1]
-                    c += 2
-                else:
-                    s2 = prole[i][c + 2]
-                    c += 1
-                for _ in range(n_desc):
-                    nova_geracao.append(miscigenacao_serial(s1, s2))
-            prole.append(nova_geracao)
-    
-    #Faz misturas sem restrição de cruzamento
-    elif tipo == 'orgia':
-        prole = [series[:]]
-        random.shuffle(prole[0])
-        for i in range(n_geracoes):
-            nova_geracao = []
-            c = 0
-            for r in range(len(prole[i]) // 2):
-                s1 = prole[i][c]
-                s2 = prole[i][c + 1]
-                c += 2
-                for _ in range(n_desc):
-                    nova_geracao.append(miscigenacao_serial(s1, s2))
-            random.shuffle(nova_geracao)
-            prole.append(nova_geracao)
+            #Adiciona a nota longa acumulada
+            if nota_longa > 0:
+                melodia[0].append(harm[serie[acc_serie]])
+                melodia[1].append(nota_longa)
+                serie.append(serie[acc_serie])
+                nota_longa = 0
                 
-    return prole 
+                #Incrementa idx da série no limite
+                acc_serie += 1
+                acc_serie = acc_serie % len(serie)
                 
-# --- BLOCO DE TESTE ---
-if __name__ == "__main__":
-    # Definindo séries iniciais (índices de referência)
-    Serie1 = [5, 4, 0, 3, 2, 2, 12, 1, 3, 2, 5, 5, 10]
-    Serie2 = [4, 8, 9, 8, 6, 11, 6, 5, 3, 0, 1, 0, 10]
-    Serie3 = [4, 6, 2, 10, 6, 5, 4, 1, 1, 0, 8, 9, 1]
-    Serie4 = [9, 9, 8, 9, 8, 6, 11, 2, 4, 6, 5, 3, 0]
-    
-    ancestrais = [Serie1, Serie2, Serie3, Serie4]
-    
-    print("--- INÍCIO DO TESTE DE PROGENITURA ---")
-    arvore_genealogica = progenitura(ancestrais, tipo='orgia', n_desc=2, n_geracoes=4)
-    
-    for idx_gen, geracao in enumerate(arvore_genealogica):
-        print(f"\n[Geração {idx_gen+4}]:")
-        for idx_serie, serie in enumerate(geracao):
-            print(f"  Série {idx_serie + 1}: {serie}")
-
+            for dur in rand_fig[0]:
+                altura = harm[serie[acc_serie]]
+                melodia[0].append(altura)
+                melodia[1].append(dur)
+                serie.append(serie[acc_serie])
                 
-            
+                #Incrementa idx da série no limite
+                acc_serie += 1
+                acc_serie = acc_serie % len(serie)
+
+            #Incrementa com a duração da figura
+            c += sum(rand_fig[0])
         
+        #Aumenta a duração da nota longa
+        else:
+            nota_longa += quantizacao
+            c += quantizacao
     
-
-        
-        
-            
-
-
+    #Adiciona nota longa restante, se for o caso
+    if nota_longa > 0:
+        melodia[0].append(harm[serie[acc_serie]])
+        melodia[1].append(nota_longa)
     
+    #Retorna a melodia completa e a série
+    return melodia[0], melodia[1], serie
