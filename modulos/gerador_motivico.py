@@ -1,4 +1,9 @@
+import os
 import random
+
+def atualiza_seed():
+    semente = int.from_bytes(os.urandom(16), 'big')
+    random.seed(semente)
 
 # Método desenvolvido para a peça "A Queda do Paissandú" (2026)
 
@@ -16,9 +21,10 @@ Geração motívica com princípio estocástico
    Espaços = len(objetos) + 1
 
 Estrutura de dados 
-    serie_alt = índices em inteiros
-    serie_dur = float, sendo 1.0 = semínima
+    serie_alt = lista de índices em inteiros
+    serie_dur = lista de float, sendo 1.0 = semínima
     lis_modo = str com nome de altura (alt_midi)
+    dur_escala = float, multiplicação aleatória da série de durações (aumentação/diminuição)
     n_tempos = int, sendo 1 = um tempo
     preenchimemento = float que estipula a porcentagem de preenchimento (0.0 a 1.0)
     quantizacao = aproximação do valor das pausas para os múltiplos de "q" (fusa, semicolcheia, etc).
@@ -28,6 +34,7 @@ Estrutura de dados
 
 def gerador_motivico_estocastico(serie_alt, serie_dur, lis_modo, dur_escala: float, n_tempos, preenchimento, quantizacao):
     
+    atualiza_seed()
     modo_idx_max = len(lis_modo)
     
     #Valida a adequação das séries
@@ -164,23 +171,26 @@ Construtor melódico
 Produz melodias de n tempos a partir da permutação de figuras rítmicas selecionadas,
 intercaladas com notas longa, assim como quantização específica por figura.
 
+Exemplo de lista de figuras (fig_lis):
+
+Lista de figuras rítmicas [0] = fig; [1] = quantização requerida
+figuras_totais = [
+    [[0.125, 0.125, 0.125, 0.125], [0.25]], #0 = Fusas
+    [[0.167, 0.167, 0.166], [0.5]],         #1 = Sextina
+    [[0.2, 0.2, 0.2, 0.2, 0.2], [1.0]],     #2 = Quintina
+    [[0.25, 0.25, 0.25], [0.25]],           #3 = Semicolcheias
+    [[0.33, 0.33, 0.33], [1.0]],            #4 = Tercinas
+    [[0.75, 0.25], [0.25]],                 #5 = Pontuada
+]
+
 - Método desenvolvido para a peça "A Queda do Paissandú" (2026)
 '''
-def construtor_melodico(harm, serie, fig_lis, duracao, prob_nota_longa=0.6):
-    
-    #Lista de figuras rítmicas [0] = fig; [1] = quantização requerida
-    figuras_totais = [
-        [[0.125, 0.125, 0.125, 0.125], [0.25]], #0 = Fusas
-        [[0.167, 0.167, 0.166], [0.5]],         #1 = Sextina
-        [[0.2, 0.2, 0.2, 0.2, 0.2], [1.0]],     #2 = Quintina
-        [[0.25, 0.25, 0.25], [0.25]],           #3 = Semicolcheias
-        [[0.33, 0.33, 0.33], [1.0]],            #4 = Tercinas
-        [[0.75, 0.25], [0.25]],                 #5 = Pontuada
-        [[4], [0.5]]                            #6 = Nota longa
-    ]
-    
+def construtor_melodico(harm, serie, duracao, fig_lis=[[[1.0],[0.5]]], dur_nota_longa=[4.0, 0.5], prob_nota_longa=0.6):
+
+    atualiza_seed()
+
     #Seleciona as figuras
-    figuras = [figuras_totais[idx] for idx in fig_lis]
+    figuras = fig_lis[:]
     
     #Valida a adequação das séries
     if len(harm) <= max(serie):
@@ -196,7 +206,7 @@ def construtor_melodico(harm, serie, fig_lis, duracao, prob_nota_longa=0.6):
         raise ValueError(f'O valor {duracao} não é múltiplo de 0.25, o valor de quantização')
 
     #Constrói a melodia
-    melodia = [[],[]]; serie = []
+    melodia = [[],[]]; serie_saida = []
     acc_serie = 0
     c = 0; nota_longa = 0
     while c < duracao:
@@ -204,7 +214,7 @@ def construtor_melodico(harm, serie, fig_lis, duracao, prob_nota_longa=0.6):
         #Determina se é nota longa ou não
         r_nota_longa = random.random()
         if r_nota_longa < prob_nota_longa:
-            rand_fig = [[duracao + 1],[1]]
+            rand_fig = [[dur_nota_longa[0]],[dur_nota_longa[1]]]
         else:
             rand_fig = random.choice(figuras)
         
@@ -215,7 +225,7 @@ def construtor_melodico(harm, serie, fig_lis, duracao, prob_nota_longa=0.6):
             if nota_longa > 0:
                 melodia[0].append(harm[serie[acc_serie]])
                 melodia[1].append(nota_longa)
-                serie.append(serie[acc_serie])
+                serie_saida.append(serie[acc_serie])
                 nota_longa = 0
                 
                 #Incrementa idx da série no limite
@@ -226,7 +236,7 @@ def construtor_melodico(harm, serie, fig_lis, duracao, prob_nota_longa=0.6):
                 altura = harm[serie[acc_serie]]
                 melodia[0].append(altura)
                 melodia[1].append(dur)
-                serie.append(serie[acc_serie])
+                serie_saida.append(serie[acc_serie])
                 
                 #Incrementa idx da série no limite
                 acc_serie += 1
@@ -245,5 +255,5 @@ def construtor_melodico(harm, serie, fig_lis, duracao, prob_nota_longa=0.6):
         melodia[0].append(harm[serie[acc_serie]])
         melodia[1].append(nota_longa)
     
-    #Retorna a melodia completa e a série
-    return melodia[0], melodia[1], serie
+    #Retorna a melodia completa (alturas, duração) e a série
+    return melodia[0], melodia[1], serie_saida

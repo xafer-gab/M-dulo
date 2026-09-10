@@ -16,20 +16,34 @@ Funções:
 def track_midi(alt_dur_din, comp_num=4, comp_den=4):
     track = MidiTrack()
     track.append(MetaMessage("time_signature", numerator=comp_num, denominator=comp_den))
-    acc = 0
+    acc = 0; acorde = []
     for i, evt in enumerate(alt_dur_din):
+        #Pausa
         if evt[0] == 'pausa':
             acc += evt[1]
+        
+        #Acorde
+        elif evt[1] == 0:
+            acorde.append(evt[0]) # Isso pressupõe que apenas a última nota do grupo tem duração
+        
+        #Note on/off
         else:
             track.append(Message('note_on', note=evt[0], velocity=evt[2], time=acc, channel=1))
+            for nota in acorde:
+                track.append(Message('note_on', note=nota, velocity=evt[2], time=0, channel=1))
             track.append(Message('note_off', note=evt[0], velocity=evt[2], time=evt[1], channel=1))
-            acc = 0
+            for nota in acorde:
+                track.append(Message('note_off', note=nota, velocity=evt[2], time=0, channel=1))
+            acc = 0; acorde = []
+    
     return track
 
 def arq_midi(tracks):
     mid = MidiFile(type=1)
+    i=0
     for trk in tracks:
         mid.tracks.append(trk)
+        i+=1
     return mid
 
 def grava_midi(mido_obj, diretorio):

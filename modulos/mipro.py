@@ -51,8 +51,13 @@ semitons = [1, -1]
 
 --- Saída
 ['do4', 're4', 'res4']
+
+Obs: O parâmetro "unissono" impede que a modulação colapse em notas repetidas,
+porém igualmente impede a continuidade de certas modulações, gerando aglomera-
+dos de semitons. Esta função é útil em conjuntos ordenados, como modos, porém 
+pode introduzir imprecisões em sequências ordenadas.
 '''
-def mipro_conjunto(cjt_harmonico: list, semitons: list):
+def mipro_conjunto(cjt_harmonico: list, semitons: list, unissono=True):
     
     #Converte para altura MIDI
     alturas_int = [midi_part.alt_midi[n] for n in cjt_harmonico]
@@ -63,6 +68,14 @@ def mipro_conjunto(cjt_harmonico: list, semitons: list):
     for i in range(len(alturas_int) - 1):
         inter_ori = alturas_int[i+1] - alturas_int[i]
         inter_mod = inter_ori + semitons[c]
+        
+        #Garante que a compressão não produz uníssono
+        if not unissono and inter_mod == 0 and inter_ori != 0:
+            if inter_ori > 0:
+                inter_mod += 1
+            else:
+                inter_mod -= 1
+        
         intervalos_mod.append(inter_mod)
         c += 1
         c = c % len(semitons)
@@ -71,6 +84,7 @@ def mipro_conjunto(cjt_harmonico: list, semitons: list):
     cjt_saida_midi = [alturas_int[0]]
     for i, inter in enumerate(intervalos_mod):
         altura = cjt_saida_midi[i] + inter
+        #Armazena
         cjt_saida_midi.append(altura)
     
     #Converte para nome de nota
@@ -87,7 +101,7 @@ def mipro_conjunto(cjt_harmonico: list, semitons: list):
         
     return cjt_saida_notas
     
-def mipro_cjt_gradual(cjt_harmonico: list, semitons: list, passos: int, modo="linear"):
+def mipro_cjt_gradual(cjt_harmonico: list, semitons: list, passos: int, modo="linear", unissono=True):
 
     #Escala a lista de semitons para o cjt_harmonico
     n_intervalos = len(cjt_harmonico) - 1
@@ -108,12 +122,11 @@ def mipro_cjt_gradual(cjt_harmonico: list, semitons: list, passos: int, modo="li
         
         #Atualiza o acumulador de fase
         acum += inter_passo
-        if abs(1.0 - acum) < 1e-7: #Arredonda decimal
-            acum = 1.0
+        if i == passos - 1:
+            acum = float(n_intervalos - idx)
         acum_int = int(acum)
         
         #Modifica apenas os indices selecionados
-        print(acum)
         secao_estado = [0 for _ in range(n_intervalos)]
         for i in range(acum_int):
             secao_estado[idx] = semitons_escalados[idx]
@@ -136,8 +149,7 @@ def mipro_cjt_gradual(cjt_harmonico: list, semitons: list, passos: int, modo="li
     #Itera cada modulação
     saida_cjts = [cjt_harmonico[:]]; cjt_h = cjt_harmonico[:]
     for mods in modulacoes:
-        print(mods)
-        cjt_modulado = mipro_conjunto(cjt_h, mods)
+        cjt_modulado = mipro_conjunto(cjt_h, mods, unissono=unissono)
         cjt_h = cjt_modulado[:]
         saida_cjts.append(cjt_modulado)
             
